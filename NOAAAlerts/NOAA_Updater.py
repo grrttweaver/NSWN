@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 import mysql.connector, requests, json, time, configparser
 
 config = configparser.ConfigParser()
-config.read('NOAA_Config.ini')
+config.read('../NSWN_Config.ini')
 
 
 try:
