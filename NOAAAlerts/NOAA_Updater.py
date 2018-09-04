@@ -1,10 +1,20 @@
-#!/usr/bin/env python
-# coding=utf-8
-from __future__ import unicode_literals
-import mysql.connector, requests, json, time, configparser
+import configparser
+import json
+import mysql.connector
+import requests
+import time
+import datetime
 
 config = configparser.ConfigParser()
 config.read('../NSWN_Config.ini')
+
+
+def logToFile(line):
+    log_file = open("NOAA_Alerts.log", "a+")
+    log_file.write(line)
+    log_file.write("\n")
+    log_file.close()
+    return line
 
 
 try:
@@ -15,12 +25,13 @@ try:
     preCur = conn.cursor(prepared=True)
 
 except mysql.connector.Error as err:
-    print err
+    print logToFile(err)
 
 url = "https://api.weather.gov/alerts/active"
 
 looper = True
 loopCount = 0
+toIgnore = {}
 while(looper):
     resp = requests.get(url)
     if resp == 200:
@@ -32,7 +43,6 @@ while(looper):
     for alert in feature:
         item = alert['properties']
         if item['messageType'] == 'Alert':
-
             severeAlerts.append(item)
 
     for d_alert in severeAlerts:
@@ -59,12 +69,9 @@ while(looper):
                 pass
 
         if isPresent < 1:
-            # sql = "INSERT INTO `NSWN`.`Alerts` (`noaa_id`, `polygonCoords`, `event`, `severity`, `nws_office`, " \
-            #       "`area_desc`, `onset`, `expires`, `headline`, `description`, `instruction`, `UGC_Codes`) " \
-            #       "VALUES ('{}', '{}', '{}', '{}', '{}', \"{}\", '{}', '{}', \"{}\", \"{}\", \"{}\", \"{}\");".format(
-            #     d_alert['id'],"null",d_alert['event'],d_alert['severity'],d_alert['senderName'], d_alert['areaDesc'],
-            #     d_alert['onset'],d_alert['expires'],d_alert['headline'],d_alert['description'],d_alert['instruction'],
-            #     arr);
+            if d_alert['id'] in toIgnore:
+                pass
+
             sql = "INSERT INTO `NSWN`.`Alerts` (`noaa_id`, `polygonCoords`, `event`, `severity`, `nws_office`," \
                   " `area_desc`, `onset`, `expires`, `headline`, `description`, `instruction`, `UGC_Codes`) " \
                   "VALUES (\"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\")"
@@ -81,15 +88,23 @@ while(looper):
             except mysql.connector.Error as err:
                 if err.errno != 10600002:
                     print "*****{}".format(err)
-                    looper = False
-                    print sql % data
+                    # looper = False
+                    if d_alert['id'] not in toIgnore:
+                        print sql % data
+                    print d_alert['id']
                     print "-------------------------------------"
+                    toIgnore[d_alert['id']] = d_alert['id']
+                    pass
+
                 else:
+                    print err
                     pass
         else:
             pass
         if loopCount > 1:
            time.sleep(3)
+
+    print "Loop Count: {} - {}\n*/=*/=*/=*/=*/=*/=*/=*/=*/=*/=*/=*/=*/=*/=*/=*/=\n".format(loopCount,datetime.datetime.now())
 
     loopCount += 1
 

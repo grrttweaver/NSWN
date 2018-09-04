@@ -7,7 +7,7 @@ config = configparser.ConfigParser()
 config.read(configFilePath)
 
 def logToFile(line):
-    log_file = open("Alerts.log", "a+")
+    log_file = open("Twitter.log", "a+")
     log_file.write(line)
     log_file.write("\n")
     log_file.close()
