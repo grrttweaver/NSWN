@@ -116,4 +116,5 @@ while True:
         pass
     else:
         logToFile("Nothing new. Checked at {}".format(str(datetime.now())))
+        print "Nothing new. Checked at {}".format(str(datetime.now()))
     time.sleep(60)
