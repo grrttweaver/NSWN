@@ -35,7 +35,7 @@ toIgnore = {}
 while(looper):
     resp = requests.get(url)
     if resp == 200:
-        print resp.status_code
+        print resp
     else:
         try:
             payload = json.loads(resp.text)
