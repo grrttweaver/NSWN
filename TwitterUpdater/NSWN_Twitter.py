@@ -36,7 +36,10 @@ while True:
     if resp == 200:
         logToFile(resp.status_code)
     else:
-        payload = json.loads(resp.text)
+        try:
+            payload = json.loads(resp.text)
+        except Exception as json_err:
+            print json_err
 
         feature = payload['features']
         severeAlerts = []
