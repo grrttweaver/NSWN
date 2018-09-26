@@ -40,8 +40,8 @@ while(looper):
         try:
             payload = json.loads(resp.text)
         except Exception as json_err:
-            print json_err
-            logToFile(json_err)
+            print json_err.message
+            logToFile(json_err.message)
         feature = payload['features']
         severeAlerts = []
     for alert in feature:
