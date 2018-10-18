@@ -13,6 +13,7 @@ def logToFile(line):
     log_file = open("NOAA_Alerts.log", "a+")
     log_file.write(line)
     log_file.write("\n")
+    log_file.flush()
     log_file.close()
     return line
 
@@ -25,9 +26,9 @@ try:
     preCur = conn.cursor(prepared=True)
 
 except mysql.connector.Error as err:
-    print logToFile(err)
+    print(logToFile(str(err)))
 
-url = "https://api.weather.gov/alerts/active"
+url = config.get("noaa","api_url")
 
 looper = True
 loopCount = 0
@@ -35,7 +36,7 @@ toIgnore = {}
 while(looper):
     resp = requests.get(url)
     if resp == 200:
-        print resp.status_code
+        print(resp.status_code)
     else:
         payload = json.loads(resp.text)
         feature = payload['features']
@@ -60,11 +61,11 @@ while(looper):
             isPresent = isPresent[0]
         except mysql.connector.Error as err:
             if err.errno != 1062:
-                print "*****{}".format(err)
+                print("*****{}".format(err))
                 looper = False
-                looperCount = 0;
-                print "\n COUNT: isPresent is: {}".format(isPresent)
-                print sql
+                looperCount = 0
+                print("\n COUNT: isPresent is: {}".format(isPresent))
+                print(sql)
             else:
                 pass
 
@@ -84,27 +85,27 @@ while(looper):
                 else:
                     preCur.execute(sql % data)
                     cur.execute("commit;")
-                    print "{}".format(d_alert['headline'])
+                    print("{}".format(d_alert['headline']))
             except mysql.connector.Error as err:
                 if err.errno != 10600002:
-                    print "*****{}".format(err)
+                    print("*****{}".format(err))
                     # looper = False
                     if d_alert['id'] not in toIgnore:
-                        print sql % data
-                    print d_alert['id']
-                    print "-------------------------------------"
+                        print(sql % data)
+                    print(d_alert['id'])
+                    print("-------------------------------------")
                     toIgnore[d_alert['id']] = d_alert['id']
                     pass
 
                 else:
-                    print err
+                    print(err)
                     pass
         else:
             pass
         if loopCount > 1:
            time.sleep(3)
 
-    print "Loop Count: {} - {}\n*/=*/=*/=*/=*/=*/=*/=*/=*/=*/=*/=*/=*/=*/=*/=*/=\n".format(loopCount,datetime.datetime.now())
+    print("Loop Count: {} - {}\n*/=*/=*/=*/=*/=*/=*/=*/=*/=*/=*/=*/=*/=*/=*/=*/=\n".format(loopCount,datetime.datetime.now()))
 
     loopCount += 1
 

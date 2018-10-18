@@ -6,26 +6,30 @@ configFilePath = os.path.join(HERE, '../NSWN_Config.ini')
 config = configparser.ConfigParser()
 config.read(configFilePath)
 
+
 def logToFile(line):
     log_file = open("Twitter.log", "a+")
     log_file.write(line)
     log_file.write("\n")
     log_file.close()
 
-url = "https://api.weather.gov/alerts/active"
-SevereAlerts = twitter.Api(consumer_key=config['twitter']['swx_consumer_key'],
-                           consumer_secret=config['twitter']['swx_consumer_secret'],
-                           access_token_key=config['twitter']['swx_access_token_key'],
-                           access_token_secret=config['twitter']['swx_access_token_secret'],
-                           sleep_on_rate_limit=config['twitter']['swx_sleep_on_rate_limit'],
-                           tweet_mode=config['twitter']['swx_tweet_mode'])
 
-TornadoAlerts = twitter.Api(consumer_key=config['twitter']['twx_consumer_key'],
-                         consumer_secret=config['twitter']['twx_consumer_secret'],
-                         access_token_key=config['twitter']['twx_access_token_key'],
-                         access_token_secret=config['twitter']['twx_access_token_secret'],
-                         sleep_on_rate_limit=config['twitter']['twx_sleep_on_rate_limit'],
-                         tweet_mode=config['twitter']['twx_tweet_mode'])
+url = config.get("noaa", "api_url")
+
+SevereAlerts = twitter.Api(consumer_key=config.get('twitter', 'swx_consumer_key'),
+                           consumer_secret=config.get('twitter', 'swx_consumer_secret'),
+                           access_token_key=config.get('twitter', 'swx_access_token_key'),
+                           access_token_secret=config.get('twitter', 'swx_access_token_secret'),
+                           sleep_on_rate_limit=config.get('twitter', 'swx_sleep_on_rate_limit'),
+                           tweet_mode=config.get('twitter', 'swx_tweet_mode'))
+
+
+TornadoAlerts = twitter.Api(consumer_key=config.get('twitter', 'twx_consumer_key'),
+                            consumer_secret=config.get('twitter', 'twx_consumer_secret'),
+                            access_token_key=config.get('twitter', 'twx_access_token_key'),
+                            access_token_secret=config.get('twitter', 'twx_access_token_secret'),
+                            sleep_on_rate_limit=config.get('twitter', 'twx_sleep_on_rate_limit'),
+                            tweet_mode=config.get('twitter', 'twx_tweet_mode'))
 
 while True:
     resp = requests.get(url)
@@ -67,7 +71,7 @@ while True:
             expires = alert['expires']
             severity = alert['severity']
             status = "A {} has been issued for {}.  Expiring at: {} ".format(event, area, expires)
-            print status
+            print(status)
 
             found = False
             for tweet in tweets:
@@ -116,5 +120,5 @@ while True:
         pass
     else:
         logToFile("Nothing new. Checked at {}".format(str(datetime.now())))
-        print "Nothing new. Checked at {}".format(str(datetime.now()))
+        print("Nothing new. Checked at {}".format(str(datetime.now())))
     time.sleep(60)
