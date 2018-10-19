@@ -38,7 +38,11 @@ while(looper):
     if resp == 200:
         print(resp.status_code)
     else:
-        payload = json.loads(resp.text)
+        try:
+            payload = json.loads(resp.text)
+        except Exception as json_err:
+            print(json_err.message)
+            logToFile(json_err.message)
         feature = payload['features']
         severeAlerts = []
     for alert in feature:
