@@ -20,7 +20,7 @@ def logToFile(line):
 
 try:
     conn = mysql.connector.connect(user=config['mysql']['username'], password=config['mysql']['password'], host=config['mysql']['host'], database=config['mysql']['database'],
-                                   port=config['mysql']['port'])
+                                   port=config['mysql']['port'], use_pure=True)
 
     cur = conn.cursor()
     preCur = conn.cursor(prepared=True)

@@ -43,7 +43,7 @@ while True:
         try:
             payload = json.loads(resp.text)
         except Exception as json_err:
-            print json_err.message
+            print(json_err.message)
             logToFile(json_err.message)
 
         feature = payload['features']
@@ -65,6 +65,8 @@ while True:
                     and item['event'] != "Severe Thunderstorm Watch" \
                     and item['event'] != "Excessive Heat Watch" \
                     and item['event'] != "Excessive Heat Warning" \
+                    and item['event'] != "Blizzard Warning" \
+                    and item['event'] != "Snow Squall Warning" \
                     and item['event'] != "Flash Flood Warning":
                 severeAlerts.append(item)
 
