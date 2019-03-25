@@ -2,7 +2,7 @@ from datetime import datetime
 import json, requests, time, twitter, configparser, os
 
 HERE = os.path.abspath(os.path.dirname(__file__))
-configFilePath = os.path.join(HERE, '../NSWN_Config.ini')
+configFilePath = os.path.join(HERE, '../NSWN_config.ini')
 config = configparser.ConfigParser()
 config.read(configFilePath)
 

@@ -30,6 +30,7 @@ except mysql.connector.Error as err:
 
 url = config.get("noaa","api_url")
 
+
 looper = True
 loopCount = 0
 toIgnore = {}
