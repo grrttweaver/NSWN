@@ -1,39 +1,33 @@
-import requests
-import configparser
-import json
-import mysql.connector
-import sys
-import time
-import datetime
+def mysql_insert(alert):
+    pass
+
+def store_alerts(alert_dict):
+    pass
 
 
-def add_to_db(config):
-    try:
-        conn = mysql.connector.connect(user=config['mysql']['username'], password=config['mysql']['password'],
-                                       host=config['mysql']['host'], database=config['mysql']['database'],
-                                       port=config['mysql']['port'], use_pure=True)
+def get_alerts_json(api_url):
+    from requests import request
+    from json import loads
 
-        cur = conn.cursor()
-        preCur = conn.cursor(prepared=True)
+    req = request("GET",api_url).text
+    alerts = loads(req)
 
-    except mysql.connector.Error as err:
-        print(str(err))
+    return alerts["features"]
 
+def main(config):
+    alerts = get_alerts_json(config.get("noaa","api_url"))
 
-def get_alerts(api_url):
-    alerts = json.loads(requests.get(api_url).text)
-    return alerts
-
-
-def main():
-    config = configparser.ConfigParser()
-    config.read(sys.argv[1])
-
-    text = get_alerts(config.get("noaa", "api_url"))
-
-    for f in text["features"]:
-        print(f['id'])
+    for alert in dict(alerts):
+        print(alert)
 
 
 if __name__ == "__main__":
-    main()
+    from sys import argv
+    from configparser import ConfigParser
+    from os import path
+
+    config_file = path.abspath(argv[1])
+    config_parse = ConfigParser()
+    config_parse.read(config_file)
+
+    main(config_parse)
