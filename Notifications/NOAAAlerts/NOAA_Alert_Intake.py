@@ -55,7 +55,11 @@ def mysql_insert(alert, config):
             preCur.execute("{} {}".format(stmt_insert, stmt_values), args)
             cur.execute("commit;")
     except mysql.connector.Error as err:
-        print(err)
+        if err.errno == 1062:
+            # Ignore duplicate entry errors
+            pass
+        else:
+            print("ERR: {} MSG: {}".format(err.errno, err.msg))
 
 
 def store_alert(alert_dict, config):
