@@ -1,6 +1,7 @@
 import datetime
 import pytz
 import json
+import mysql.connector
 
 
 def return_coords(coords):
@@ -21,15 +22,42 @@ def convert_date_utc(date_str):
         return dt.astimezone(pytz.utc)
 
 
-def mysql_insert(alert, config):
-    import mysql.connector
-
+def mysql_select_existing_alerts(alert, config):
     try:
         con = mysql.connector.connect(user=config.get("mysql", "username"), password=config.get("mysql", "password"),
                                       host=config.get("mysql", "host"), database=config.get("mysql", "database"),
                                       port=config.get("mysql", "port"), use_pure=True)
         cur = con.cursor()
-        preCur = con.cursor(prepared=True)
+
+    except mysql.connector.Error as err:
+        print(str(err))
+
+    try:
+        qry = "SELECT `alerts_id` FROM `NSWN`.`NWS_Alerts` WHERE `noaa_id` = '{}'".format(alert['properties']['id'])
+        cur.execute(qry)
+        if cur.fetchall().__len__() > 0:
+            return True
+        else:
+            return False
+    except mysql.connector.Error as err:
+        print(str(err))
+
+
+def check_for_new_alerts(alerts, config):
+    for alert in alerts:
+        if mysql_select_existing_alerts(alert, config):
+            pass
+        else:
+            mysql_insert_alert(alert, config)
+
+
+def mysql_insert_alert(alert, config):
+    try:
+        con = mysql.connector.connect(user=config.get("mysql", "username"), password=config.get("mysql", "password"),
+                                      host=config.get("mysql", "host"), database=config.get("mysql", "database"),
+                                      port=config.get("mysql", "port"), use_pure=True)
+        cur = con.cursor()
+        prepared_cursor = con.cursor(prepared=True)
 
     except mysql.connector.Error as err:
         print(str(err))
@@ -53,7 +81,7 @@ def mysql_insert(alert, config):
         if alert['properties']['event'] == "Test Message":
             pass
         else:
-            preCur.execute("{} {}".format(stmt_insert, stmt_values), args)
+            prepared_cursor.execute("{} {}".format(stmt_insert, stmt_values), args)
             print(alert['properties']['headline'])
             cur.execute("commit;")
     except mysql.connector.Error as err:
@@ -62,11 +90,6 @@ def mysql_insert(alert, config):
             pass
         else:
             print("ERR: {} MSG: {}".format(err.errno, err.msg))
-
-
-def store_alert(alert_dict, config):
-    for alert in alert_dict:
-        mysql_insert(alert, config)
 
 
 def get_alerts_json(api_url, request):
@@ -78,8 +101,7 @@ def get_alerts_json(api_url, request):
 
 def main(config, request):
     alerts = get_alerts_json(config.get("noaa", "api_url"), request)
-
-    store_alert(alerts, config)
+    check_for_new_alerts(alerts, config)
 
 
 if __name__ == "__main__":
