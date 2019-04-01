@@ -53,6 +53,7 @@ def mysql_insert(alert, config):
             pass
         else:
             preCur.execute("{} {}".format(stmt_insert, stmt_values), args)
+            print(alert['properties']['headline'])
             cur.execute("commit;")
     except mysql.connector.Error as err:
         if err.errno == 1062:
