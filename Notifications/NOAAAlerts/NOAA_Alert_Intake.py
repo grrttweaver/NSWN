@@ -29,16 +29,13 @@ def mysql_select_existing_alerts(alert, config):
                                       port=config.get("mysql", "port"), use_pure=True)
         cur = con.cursor()
 
-    except mysql.connector.Error as err:
-        print(str(err))
-
-    try:
         qry = "SELECT `alerts_id` FROM `NSWN`.`NWS_Alerts` WHERE `noaa_id` = '{}'".format(alert['properties']['id'])
         cur.execute(qry)
         if cur.fetchall().__len__() > 0:
             return True
         else:
             return False
+
     except mysql.connector.Error as err:
         print(str(err))
 
@@ -59,37 +56,37 @@ def mysql_insert_alert(alert, config):
         cur = con.cursor()
         prepared_cursor = con.cursor(prepared=True)
 
+        stmt_insert = "INSERT INTO `NSWN`.`NWS_Alerts` (`noaa_id`, `areaDesc`, `geocode_UGC`, `geocode_SAME`, `sent`, " \
+                      "`effective`, `onset`, `expires`, `ends`, `status`, `messageType`, `category`, `severity`, " \
+                      "`certainty`, `urgency`, `event`, `senderName`, `headline`, `description`, `instruction`, " \
+                      "`response`, `geometry`)"
+        stmt_values = "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+        args = (alert['properties']['id'], alert['properties']['areaDesc'], str(alert['properties']['geocode']['UGC']),
+                str(alert['properties']['geocode']['SAME']), convert_date_utc(alert['properties']['sent']),
+                convert_date_utc(alert['properties']['effective']), convert_date_utc(alert['properties']['onset']),
+                convert_date_utc(alert['properties']['expires']), convert_date_utc(alert['properties']['ends']),
+                alert['properties']['status'], alert['properties']['messageType'], alert['properties']['category'],
+                alert['properties']['severity'], alert['properties']['certainty'], alert['properties']['urgency'],
+                alert['properties']['event'], alert['properties']['senderName'], alert['properties']['headline'],
+                alert['properties']['description'], alert['properties']['instruction'], alert['properties']['response'],
+                return_coords(alert))
+
+        try:
+            if alert['properties']['event'] == "Test Message":
+                pass
+            else:
+                prepared_cursor.execute("{} {}".format(stmt_insert, stmt_values), args)
+                print(alert['properties']['headline'])
+                cur.execute("commit;")
+        except mysql.connector.Error as err:
+            if err.errno == 1062:
+                # Ignore duplicate entry errors
+                pass
+            else:
+                print("ERR: {} MSG: {}".format(err.errno, err.msg))
+
     except mysql.connector.Error as err:
         print(str(err))
-
-    stmt_insert = "INSERT INTO `NSWN`.`NWS_Alerts` (`noaa_id`, `areaDesc`, `geocode_UGC`, `geocode_SAME`, `sent`, " \
-                  "`effective`, `onset`, `expires`, `ends`, `status`, `messageType`, `category`, `severity`, " \
-                  "`certainty`, `urgency`, `event`, `senderName`, `headline`, `description`, `instruction`, " \
-                  "`response`, `geometry`)"
-    stmt_values = "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-    args = (alert['properties']['id'], alert['properties']['areaDesc'], str(alert['properties']['geocode']['UGC']),
-            str(alert['properties']['geocode']['SAME']), convert_date_utc(alert['properties']['sent']),
-            convert_date_utc(alert['properties']['effective']), convert_date_utc(alert['properties']['onset']),
-            convert_date_utc(alert['properties']['expires']), convert_date_utc(alert['properties']['ends']),
-            alert['properties']['status'], alert['properties']['messageType'], alert['properties']['category'],
-            alert['properties']['severity'], alert['properties']['certainty'], alert['properties']['urgency'],
-            alert['properties']['event'], alert['properties']['senderName'], alert['properties']['headline'],
-            alert['properties']['description'], alert['properties']['instruction'], alert['properties']['response'],
-            return_coords(alert))
-
-    try:
-        if alert['properties']['event'] == "Test Message":
-            pass
-        else:
-            prepared_cursor.execute("{} {}".format(stmt_insert, stmt_values), args)
-            print(alert['properties']['headline'])
-            cur.execute("commit;")
-    except mysql.connector.Error as err:
-        if err.errno == 1062:
-            # Ignore duplicate entry errors
-            pass
-        else:
-            print("ERR: {} MSG: {}".format(err.errno, err.msg))
 
 
 def get_alerts_json(api_url, request):
