@@ -44,7 +44,7 @@ def check_for_new_alerts(alerts, config):
 
     def check_if_exist(alert_id):
         for stored_alert in alerts_stored:
-            if stored_alert == alert_id:
+            if str(stored_alert[0]) == str(alert_id):
                 return True
             else:
                 pass
