@@ -22,27 +22,37 @@ def convert_date_utc(date_str):
         return dt.astimezone(pytz.utc)
 
 
-def mysql_select_existing_alerts(alert, config):
+def mysql_select_existing_alerts(config):
     try:
         con = mysql.connector.connect(user=config.get("mysql", "username"), password=config.get("mysql", "password"),
                                       host=config.get("mysql", "host"), database=config.get("mysql", "database"),
                                       port=config.get("mysql", "port"), use_pure=True)
         cur = con.cursor()
 
-        qry = "SELECT `alerts_id` FROM `NSWN`.`NWS_Alerts` WHERE `noaa_id` = '{}'".format(alert['properties']['id'])
+        qry = "SELECT `noaa_id` FROM `NSWN`.`NWS_Alerts`"
         cur.execute(qry)
-        if cur.fetchall().__len__() > 0:
-            return True
-        else:
-            return False
+        res = cur.fetchall()
+        cur.close()
+        return res
 
     except mysql.connector.Error as err:
         print(str(err))
 
 
 def check_for_new_alerts(alerts, config):
+    alerts_stored = mysql_select_existing_alerts(config)
+
+    def check_if_exist(alert_id):
+        for stored_alert in alerts_stored:
+            if stored_alert == alert_id:
+                return True
+            else:
+                pass
+
+        return False
+
     for alert in alerts:
-        if mysql_select_existing_alerts(alert, config):
+        if check_if_exist(alert['properties']['id']):
             pass
         else:
             mysql_insert_alert(alert, config)
@@ -78,7 +88,11 @@ def mysql_insert_alert(alert, config):
                 prepared_cursor.execute("{} {}".format(stmt_insert, stmt_values), args)
                 print(alert['properties']['headline'])
                 cur.execute("commit;")
+                cur.close()
+                prepared_cursor.close()
         except mysql.connector.Error as err:
+            cur.close()
+            prepared_cursor.close()
             if err.errno == 1062:
                 # Ignore duplicate entry errors
                 pass
