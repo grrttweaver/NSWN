@@ -93,11 +93,7 @@ def mysql_insert_alert(alert, config):
         except mysql.connector.Error as err:
             cur.close()
             prepared_cursor.close()
-            if err.errno == 1062:
-                # Ignore duplicate entry errors
-                pass
-            else:
-                print("ERR: {} MSG: {}".format(err.errno, err.msg))
+            print("ERR: {} MSG: {}".format(err.errno, err.msg))
 
     except mysql.connector.Error as err:
         print(str(err))
