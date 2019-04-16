@@ -90,7 +90,8 @@ while True:
             if not found:
                 try:
                     if len(status) <= 140:
-                        maybeTweet = "The {} Office has issued a {} for {}. Expiring at {}".format(office,event,area,expires)
+                        maybeTweet = "The {} Office has issued a {} for {}. Expiring at {}".format(office, event, area,
+                                                                                                   expires)
                         if len(maybeTweet) <= 140:
                             if str(severity) == "Extreme":
                                 tweet = TornadoAlerts.PostUpdate(maybeTweet)
