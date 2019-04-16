@@ -1,7 +1,7 @@
 import twitter
 
-def classify_alert(alert_json):
 
+def classify_alert(alert_json):
     excluded_severities = ["Minor", "Moderate"]
 
     twx_alerts = ["Tornado Warning", "Tornado Watch", "Tornado Emergency"]
