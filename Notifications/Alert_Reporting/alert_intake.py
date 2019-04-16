@@ -88,7 +88,7 @@ def mysql_insert_alert(alert, config):
                 pass
             else:
                 prepared_cursor.execute("{} {}".format(stmt_insert, stmt_values), args)
-                print(alert['properties']['headline'])
+                print("{} - {}".format(alert['properties']['headline'], alert['properties']['noaa_ids']))
                 cur.execute("commit;")
                 cur.close()
                 prepared_cursor.close()

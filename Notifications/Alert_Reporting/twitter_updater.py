@@ -96,32 +96,36 @@ def main(config, alert):
 
     alert_class = classify_alert(alert)
 
-    if alert_class == "Tornado":
-        tweet = make_tweet_text(alert)
-        twx_twitter.PostUpdate(tweet)
-        swx_twitter.PostUpdate(tweet)
+    tweet = make_tweet_text(alert)
+    try:
+        if alert_class == "Tornado":
+            twx_twitter.PostUpdate(tweet)
+            swx_twitter.PostUpdate(tweet)
 
-    elif alert_class == "Ocean":
-        tweet = make_tweet_text(alert)
-        ocean_twitter.PostUpdate(tweet)
-        swx_twitter.PostUpdate(tweet)
+        elif alert_class == "Ocean":
+            ocean_twitter.PostUpdate(tweet)
+            swx_twitter.PostUpdate(tweet)
 
-    elif alert_class == "Winter":
-        tweet = make_tweet_text(alert)
-        frosty_twitter.PostUpdate(tweet)
-        swx_twitter.PostUpdate(tweet)
+        elif alert_class == "Winter":
+            frosty_twitter.PostUpdate(tweet)
+            swx_twitter.PostUpdate(tweet)
 
-    elif alert_class == "SWx":
-        tweet = make_tweet_text(alert)
-        swx_twitter.PostUpdate(tweet)
+        elif alert_class == "SWx":
+            swx_twitter.PostUpdate(tweet)
 
-    elif alert_class == "reportable_unknown":
-        tweet = make_tweet_text(alert)
-        main_twitter.PostUpdate(tweet)
+        elif alert_class == "reportable_unknown":
+            main_twitter.PostUpdate(tweet)
 
-    elif alert_class == "no_tweet":
-        pass
+        elif alert_class == "no_tweet":
+            pass
 
-    else:
-        tweet = make_tweet_text(alert)
-        print("{} - Didn't get tweeted / properly classified!".format(tweet))
+        else:
+            print("{} - Didn't get tweeted / properly classified!".format(tweet))
+
+    except Exception as err:
+        err_message = dict(err.message[0])
+        err_mess = err_message['message']
+        if err_mess == "Status is a duplicate.":
+            pass
+        else:
+            print("***\t\t{} \n\t Problem with tweeting: {}".format(tweet, err_mess))
