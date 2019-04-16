@@ -2,6 +2,7 @@ import datetime
 import pytz
 import json
 import mysql.connector
+import twitter_updater
 
 
 def return_coords(coords):
@@ -56,6 +57,7 @@ def check_for_new_alerts(alerts, config):
             pass
         else:
             mysql_insert_alert(alert, config)
+            twitter_updater.main(config, alert)
 
 
 def mysql_insert_alert(alert, config):
