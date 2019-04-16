@@ -19,6 +19,9 @@ def classify_alert(alert_json):
     if alert_json['properties']['severity'] in excluded_severities:
         return "no_tweet"
 
+    elif alert_json['properties']['event'] == "Test Message":
+        return "no_tweet"
+
     elif alert_json['properties']['event'] in twx_alerts:
         return "Tornado"
 
