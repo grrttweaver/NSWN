@@ -5,7 +5,7 @@ def classify_alert(alert):
     twx_alerts = ["Tornado Warning", "Tornado Watch", "Tornado Emergency"]
 
     ocean_alerts = ["Hurricane Watch", "Hurricane Warning", "Storm Surge Watch", "Storm Surge Warning",
-                       "Typhoon Watch", "Typhoon Warning", "Tropical Storm Watch", "Tropical Storm Warning"]
+                    "Typhoon Watch", "Typhoon Warning", "Tropical Storm Watch", "Tropical Storm Warning"]
 
     winter_alerts = ["Blizzard Warning", "Extreme Cold Warning (Alaska only)", "Hard Freeze Warning",
                      "Ice Storm Warning", "Snow Squall Warning", "Winter Storm Watch", "Winter Storm Warning",
@@ -36,8 +36,18 @@ def classify_alert(alert):
     else:
         return "no_tweet"
 
+def make_tweet_text(alert_obj):
+    alert_obj = alert_obj['properties']
+    tweet = "The {} Office has issued a {} for {}. Expiring at {}".format(alert_obj['senderName'], alert_obj['event'],
+                                                                          alert_obj['areaDesc'], alert_obj['expires'])
 
-def main(config, argv, Api):
+    if tweet.__len__() > 140:
+        tweet = "{}...".format(tweet[:137])
+
+    return tweet
+
+
+def main(config, alert, Api):
 
     swx_twitter = Api(consumer_key=config.get('twitter', 'swx_consumer_key'),
                       consumer_secret=config.get('twitter', 'swx_consumer_secret'),
@@ -54,36 +64,64 @@ def main(config, argv, Api):
                       tweet_mode=config.get('twitter', 'twx_tweet_mode'))
 
     frosty_twitter = Api(consumer_key=config.get('twitter', 'frosty_consumer_key'),
-                      consumer_secret=config.get('twitter', 'frosty_consumer_secret'),
-                      access_token_key=config.get('twitter', 'frosty_access_token_key'),
-                      access_token_secret=config.get('twitter', 'frosty_access_token_secret'),
-                      sleep_on_rate_limit=config.get('twitter', 'frosty_sleep_on_rate_limit'),
-                      tweet_mode=config.get('twitter', 'frosty_tweet_mode'))
+                         consumer_secret=config.get('twitter', 'frosty_consumer_secret'),
+                         access_token_key=config.get('twitter', 'frosty_access_token_key'),
+                         access_token_secret=config.get('twitter', 'frosty_access_token_secret'),
+                         sleep_on_rate_limit=config.get('twitter', 'frosty_sleep_on_rate_limit'),
+                         tweet_mode=config.get('twitter', 'frosty_tweet_mode'))
 
     main_twitter = Api(consumer_key=config.get('twitter', 'main_consumer_key'),
-                      consumer_secret=config.get('twitter', 'main_consumer_secret'),
-                      access_token_key=config.get('twitter', 'main_access_token_key'),
-                      access_token_secret=config.get('twitter', 'main_access_token_secret'),
-                      sleep_on_rate_limit=config.get('twitter', 'main_sleep_on_rate_limit'),
-                      tweet_mode=config.get('twitter', 'main_tweet_mode'))
+                       consumer_secret=config.get('twitter', 'main_consumer_secret'),
+                       access_token_key=config.get('twitter', 'main_access_token_key'),
+                       access_token_secret=config.get('twitter', 'main_access_token_secret'),
+                       sleep_on_rate_limit=config.get('twitter', 'main_sleep_on_rate_limit'),
+                       tweet_mode=config.get('twitter', 'main_tweet_mode'))
 
     ocean_twitter = Api(consumer_key=config.get('twitter', 'ocean_consumer_key'),
-                      consumer_secret=config.get('twitter', 'ocean_consumer_secret'),
-                      access_token_key=config.get('twitter', 'ocean_access_token_key'),
-                      access_token_secret=config.get('twitter', 'ocean_access_token_secret'),
-                      sleep_on_rate_limit=config.get('twitter', 'ocean_sleep_on_rate_limit'),
-                      tweet_mode=config.get('twitter', 'ocean_tweet_mode'))
+                        consumer_secret=config.get('twitter', 'ocean_consumer_secret'),
+                        access_token_key=config.get('twitter', 'ocean_access_token_key'),
+                        access_token_secret=config.get('twitter', 'ocean_access_token_secret'),
+                        sleep_on_rate_limit=config.get('twitter', 'ocean_sleep_on_rate_limit'),
+                        tweet_mode=config.get('twitter', 'ocean_tweet_mode'))
 
     test_twitter = Api(consumer_key=config.get('twitter', 'test_consumer_key'),
-                      consumer_secret=config.get('twitter', 'test_consumer_secret'),
-                      access_token_key=config.get('twitter', 'test_access_token_key'),
-                      access_token_secret=config.get('twitter', 'test_access_token_secret'),
-                      sleep_on_rate_limit=config.get('twitter', 'test_sleep_on_rate_limit'),
-                      tweet_mode=config.get('twitter', 'test_tweet_mode'))
+                       consumer_secret=config.get('twitter', 'test_consumer_secret'),
+                       access_token_key=config.get('twitter', 'test_access_token_key'),
+                       access_token_secret=config.get('twitter', 'test_access_token_secret'),
+                       sleep_on_rate_limit=config.get('twitter', 'test_sleep_on_rate_limit'),
+                       tweet_mode=config.get('twitter', 'test_tweet_mode'))
 
+    alert_class = classify_alert(alert)
 
+    if alert_class == "Tornado":
+        tweet = make_tweet_text(alert)
+        twx_twitter.PostUpdate(tweet)
+        swx_twitter.PostUpdate(tweet)
 
+    elif alert_class == "Ocean":
+        tweet = make_tweet_text(alert)
+        ocean_twitter.PostUpdate(tweet)
+        swx_twitter.PostUpdate(tweet)
 
+    elif alert_class == "Winter":
+        tweet = make_tweet_text(alert)
+        frosty_twitter.PostUpdate(tweet)
+        swx_twitter.PostUpdate(tweet)
+
+    elif alert_class == "SWx":
+        tweet = make_tweet_text(alert)
+        swx_twitter.PostUpdate(tweet)
+
+    elif alert_class == "reportable_unknown":
+        tweet = make_tweet_text(alert)
+        main_twitter.PostUpdate(tweet)
+
+    elif alert_class == "no_tweet":
+        pass
+
+    else:
+        tweet = make_tweet_text(alert)
+        print("{} - Didn't get tweeted / properly classified!".format(tweet))
 
 
 if __name__ == "__main__":
@@ -96,4 +134,6 @@ if __name__ == "__main__":
     config_parse = ConfigParser()
     config_parse.read(config_file)
 
-    main(config_parse, argv, Api)
+    alert = argv[2]
+
+    main(config_parse, alert, Api)

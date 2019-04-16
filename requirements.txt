@@ -5,6 +5,7 @@ future==0.17.1
 idna==2.8
 mysql-connector-python==8.0.15
 oauthlib==3.0.1
+pika==1.0.0
 protobuf==3.7.0
 python-twitter==3.5
 pytz==2018.9

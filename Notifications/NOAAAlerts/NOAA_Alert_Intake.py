@@ -66,10 +66,10 @@ def mysql_insert_alert(alert, config):
         cur = con.cursor()
         prepared_cursor = con.cursor(prepared=True)
 
-        stmt_insert = "INSERT INTO `NSWN`.`NWS_Alerts` (`noaa_id`, `areaDesc`, `geocode_UGC`, `geocode_SAME`, `sent`, " \
-                      "`effective`, `onset`, `expires`, `ends`, `status`, `messageType`, `category`, `severity`, " \
-                      "`certainty`, `urgency`, `event`, `senderName`, `headline`, `description`, `instruction`, " \
-                      "`response`, `geometry`)"
+        stmt_insert = "INSERT INTO `NSWN`.`NWS_Alerts` (`noaa_id`, `areaDesc`, `geocode_UGC`, `geocode_SAME`, " \
+                      "`sent`, `effective`, `onset`, `expires`, `ends`, `status`, `messageType`, `category`, " \
+                      "`severity`, `certainty`, `urgency`, `event`, `senderName`, `headline`, `description`, " \
+                      "`instruction`, `response`, `geometry`)"
         stmt_values = "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
         args = (alert['properties']['id'], alert['properties']['areaDesc'], str(alert['properties']['geocode']['UGC']),
                 str(alert['properties']['geocode']['SAME']), convert_date_utc(alert['properties']['sent']),
