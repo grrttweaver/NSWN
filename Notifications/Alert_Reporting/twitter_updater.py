@@ -12,7 +12,7 @@ def simple_timestamp(timestamp):
             return timestamp
 
     dt = datetime.datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%S%z")
-    eval_offset(dt.timetz())
+    return eval_offset(dt.timetz())
 
 
 def classify_alert(alert_json):
