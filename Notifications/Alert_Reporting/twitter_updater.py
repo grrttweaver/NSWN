@@ -6,13 +6,10 @@ def simple_timestamp(timestamp):
     def eval_offset(time_off):
         try:
             time = str(time_off).split("-")
+            utc = datetime.datetime.strptime(time[0], "%H:%M:%S")
+            return utc.strftime("%I:%M %p")
         except:
-            try:
-                time = str(time_off).split("+")
-            except:
-                print("Error with: {}".format(timestamp))
-        utc = datetime.datetime.strptime(time[0], "%H:%M:%S")
-        return utc.strftime("%I:%M %p")
+            return timestamp
 
     dt = datetime.datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%S%z")
     eval_offset(dt.timetz())
