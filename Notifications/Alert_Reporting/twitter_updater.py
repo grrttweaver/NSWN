@@ -58,9 +58,9 @@ def classify_alert(alert_json):
 
 def make_tweet_text(alert_json):
     alert_json = alert_json['properties']
-    tweet = "The {} Office has issued a {} for {}. " \
-            "Expiring at {} (Local)".format(alert_json['senderName'], alert_json['event'], alert_json['areaDesc'],
-                                            simple_timestamp(alert_json['expires']))
+    tweet = "{} issued a {} for {}. Expiring at {} (Local)".format(alert_json['senderName'], alert_json['event'],
+                                                                   alert_json['areaDesc'],
+                                                                   simple_timestamp(alert_json['expires']))
 
     if tweet.__len__() > 140:
         tweet = "{}...".format(tweet[:137])
