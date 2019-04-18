@@ -4,7 +4,13 @@ import datetime
 
 def simple_timestamp(timestamp):
     def eval_offset(time_off):
-        time = str(time_off).split("-")
+        try:
+            time = str(time_off).split("-")
+        except:
+            try:
+                time = str(time_off).split("+")
+            except:
+                print("Error with: {}".format(timestamp))
         utc = datetime.datetime.strptime(time[0], "%H:%M:%S")
         return utc.strftime("%I:%M %p")
 
