@@ -1,4 +1,15 @@
 import twitter
+import datetime
+
+
+def simple_timestamp(timestamp):
+    def eval_offset(time_off):
+        time = str(time_off).split("-")
+        utc = datetime.datetime.strptime(time[0], "%H:%M:%S")
+        return utc.strftime("%I:%M %p")
+
+    dt = datetime.datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%S%z")
+    eval_offset(dt.timetz())
 
 
 def classify_alert(alert_json):
@@ -44,8 +55,9 @@ def classify_alert(alert_json):
 
 def make_tweet_text(alert_json):
     alert_json = alert_json['properties']
-    tweet = "The {} Office has issued a {} for {}. Expiring at {}".format(alert_json['senderName'], alert_json['event'],
-                                                                          alert_json['areaDesc'], alert_json['expires'])
+    tweet = "The {} Office has issued a {} for {}. " \
+            "Expiring at {} (Local)".format(alert_json['senderName'], alert_json['event'], alert_json['areaDesc'],
+                                            simple_timestamp(alert_json['expires']))
 
     if tweet.__len__() > 140:
         tweet = "{}...".format(tweet[:137])
