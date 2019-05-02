@@ -30,7 +30,7 @@ def mysql_select_existing_alerts(config):
                                       port=config.get("mysql", "port"), use_pure=True)
         cur = con.cursor()
 
-        qry = "SELECT `noaa_id` FROM `NSWN`.`NWS_Alerts`"
+        qry = "SELECT `noaa_id` FROM `NSWN`.`NWS_Test_Alerts`"
         cur.execute(qry)
         res = cur.fetchall()
         cur.close()
@@ -68,11 +68,13 @@ def mysql_insert_alert(alert, config):
         cur = con.cursor()
         prepared_cursor = con.cursor(prepared=True)
 
-        stmt_insert = "INSERT INTO `NSWN`.`NWS_Alerts` (`noaa_id`, `areaDesc`, `geocode_UGC`, `geocode_SAME`, " \
+        stmt_insert = "INSERT INTO `NSWN`.`NWS_Test_Alerts` (`noaa_id`, `areaDesc`, `geocode_UGC`, `geocode_SAME`, " \
                       "`sent`, `effective`, `onset`, `expires`, `ends`, `status`, `messageType`, `category`, " \
                       "`severity`, `certainty`, `urgency`, `event`, `senderName`, `headline`, `description`, " \
-                      "`instruction`, `response`, `geometry`)"
-        stmt_values = "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+                      "`instruction`, `response`, `geometry`,`raw_sent`,`raw_effective`,`raw_onset`,`raw_expires`," \
+                      "`raw_ends`)"
+        stmt_values = "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s," \
+                      " %s, %s, %s, %s, %s)"
         args = (alert['properties']['id'], alert['properties']['areaDesc'], str(alert['properties']['geocode']['UGC']),
                 str(alert['properties']['geocode']['SAME']), convert_date_utc(alert['properties']['sent']),
                 convert_date_utc(alert['properties']['effective']), convert_date_utc(alert['properties']['onset']),
@@ -81,14 +83,14 @@ def mysql_insert_alert(alert, config):
                 alert['properties']['severity'], alert['properties']['certainty'], alert['properties']['urgency'],
                 alert['properties']['event'], alert['properties']['senderName'], alert['properties']['headline'],
                 alert['properties']['description'], alert['properties']['instruction'], alert['properties']['response'],
-                return_coords(alert))
+                return_coords(alert), alert['properties']['sent'], alert['properties']['effective'],
+                alert['properties']['onset'], alert['properties']['expires'], alert['properties']['ends'])
 
         try:
             if alert['properties']['event'] == "Test Message":
                 pass
             else:
                 prepared_cursor.execute("{} {}".format(stmt_insert, stmt_values), args)
-                # print(alert)
                 print("{} - {}".format(alert['properties']['headline'], alert['properties']['id']))
                 cur.execute("commit;")
                 cur.close()
