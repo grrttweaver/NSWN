@@ -30,7 +30,7 @@ def mysql_select_existing_alerts(config):
                                       port=config.get("mysql", "port"), use_pure=True)
         cur = con.cursor()
 
-        qry = "SELECT `noaa_id` FROM `NSWN`.`NWS_Test_Alerts`"
+        qry = "SELECT `noaa_id` FROM `NSWN`.`NWS_Alerts`"
         cur.execute(qry)
         res = cur.fetchall()
         cur.close()
@@ -68,7 +68,7 @@ def mysql_insert_alert(alert, config):
         cur = con.cursor()
         prepared_cursor = con.cursor(prepared=True)
 
-        stmt_insert = "INSERT INTO `NSWN`.`NWS_Test_Alerts` (`noaa_id`, `areaDesc`, `geocode_UGC`, `geocode_SAME`, " \
+        stmt_insert = "INSERT INTO `NSWN`.`NWS_Alerts` (`noaa_id`, `areaDesc`, `geocode_UGC`, `geocode_SAME`, " \
                       "`sent`, `effective`, `onset`, `expires`, `ends`, `status`, `messageType`, `category`, " \
                       "`severity`, `certainty`, `urgency`, `event`, `senderName`, `headline`, `description`, " \
                       "`instruction`, `response`, `geometry`,`raw_sent`,`raw_effective`,`raw_onset`,`raw_expires`," \
