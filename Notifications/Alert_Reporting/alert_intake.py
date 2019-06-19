@@ -56,6 +56,9 @@ def check_for_new_alerts(alerts, config):
         if check_if_exist(alert['properties']['id']):
             pass
         else:
+            # check format of alert here
+            if 'UGC' not in alert['properties']['geocode']:
+                alert['properties']['geocode'] = {"UGC":[], "SAME":[]}
             mysql_insert_alert(alert, config)
             twitter_updater.main(config, alert)
 
@@ -73,7 +76,7 @@ def mysql_insert_alert(alert, config):
                       "`severity`, `certainty`, `urgency`, `event`, `senderName`, `headline`, `description`, " \
                       "`instruction`, `response`, `geometry`,`raw_sent`,`raw_effective`,`raw_onset`,`raw_expires`," \
                       "`raw_ends`)"
-        stmt_values = "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s," \
+        stmt_values = "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,"\
                       " %s, %s, %s, %s, %s)"
         args = (alert['properties']['id'], alert['properties']['areaDesc'], str(alert['properties']['geocode']['UGC']),
                 str(alert['properties']['geocode']['SAME']), convert_date_utc(alert['properties']['sent']),
